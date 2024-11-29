@@ -25,19 +25,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-public:
+protected:
 
-	/*US1Object* Obj1;
-
-	UPROPERTY()
-	US1Object* Obj2;*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Stat)
-	int32 Hp = 100;
-
-	UPROPERTY(VisibleAnywhere)
-	int32 Mp = 50;
-	
-	UPROPERTY(VisibleAnywhere)
-	float Speed = 3.5f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<UStaticMeshComponent> Box;
 };
