@@ -17,10 +17,10 @@ void AS1Actor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Obj1 = NewObject<US1Object>();
-	Obj2 = NewObject<US1Object>();
+	//Obj1 = NewObject<US1Object>();
+	//Obj2 = NewObject<US1Object>();
 
-	GEngine->ForceGarbageCollection(true);
+	//GEngine->ForceGarbageCollection(true);
 }
 
 // Called every frame
@@ -28,14 +28,4 @@ void AS1Actor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Obj1 == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Obj1 Deleted"));
-	}
-	
-	if (Obj2 == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Obj2 Deleted"));
-	}
 }
-
