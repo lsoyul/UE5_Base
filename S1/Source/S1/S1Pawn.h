@@ -3,19 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "S1Actor.generated.h"
-
-class US1Object;
+#include "GameFramework/Pawn.h"
+#include "S1Pawn.generated.h"
 
 UCLASS()
-class S1_API AS1Actor : public AActor
+class S1_API AS1Pawn : public APawn
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AS1Actor();
+
+public:
+	// Sets default values for this pawn's properties
+	AS1Pawn();
 
 protected:
 	// Called when the game starts or when spawned
@@ -25,10 +23,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	US1Object* Obj1;
-
-	UPROPERTY()
-	US1Object* Obj2;
 };
