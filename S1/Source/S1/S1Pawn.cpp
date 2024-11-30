@@ -3,11 +3,32 @@
 
 #include "S1Pawn.h"
 
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+
 // Sets default values
 AS1Pawn::AS1Pawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+	RootComponent = CapsuleComponent;
+
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	Mesh->SetupAttachment(CapsuleComponent);
+	Mesh->SetRelativeLocationAndRotation(FVector(0, 0, -88), FRotator(0, -90, 0));	// FRotator(Y - pitch, Z - yaw, X - roll);
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
+	SpringArm->SetupAttachment(CapsuleComponent);
+	SpringArm->TargetArmLength = 700.0f;
+	SpringArm->SetRelativeRotation(FRotator(-30, 0, 0));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
 
 }
 
