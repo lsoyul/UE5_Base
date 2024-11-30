@@ -4,6 +4,7 @@
 #include "S1Actor.h"
 #include "S1Object.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 // CDO와 연관된 부분만 초기화 하는것을 권장.
@@ -25,11 +26,16 @@ AS1Actor::AS1Actor()
 void AS1Actor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	//Target = UGameplayStatics::GetActorOfClass(GetWorld(), AS1Actor::StaticClass());
+	TArray<AActor*> Actors;
 
-	//Obj1 = NewObject<US1Object>();
-	//Obj2 = NewObject<US1Object>();
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Trycatch"), Actors);
 
-	//GEngine->ForceGarbageCollection(true);
+	if (Actors.Num() > 0)
+	{
+		Target = Actors[0];
+	}
 }
 
 // Called every frame
@@ -37,4 +43,18 @@ void AS1Actor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (Target != nullptr)
+	{
+		float Speed = 50.0f;
+		float Distance = DeltaTime * Speed;
+
+		FVector Location = GetActorLocation();
+		FVector DirectionVector = Target->GetActorLocation() - GetActorLocation();
+		DirectionVector.Normalize();
+
+		FVector NewLocation = Location + DirectionVector * Distance;
+		//SetActorLocation(NewLocation);
+
+		AddActorWorldOffset(DirectionVector * Distance);
+	}
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MainActor.generated.h"
 
+
 UCLASS()
 class S1_API AMainActor : public AActor
 {
