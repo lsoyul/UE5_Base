@@ -10,10 +10,16 @@
 
 class US1AssetData;
 
+DECLARE_DELEGATE_TwoParams(FAsyncLoadCompletedDelegate, const FName&/*AssetName or Label*/, UObject*/*LoadedAsset*/);
+
 UCLASS()
 class S1_API US1AssetManager : public UAssetManager
 {
 	GENERATED_BODY()
+
+	//using FuncPtrType = void(*)(int a, int b);
+
+	FAsyncLoadCompletedDelegate test;
 	
 public:
 	US1AssetManager();
@@ -29,6 +35,11 @@ public:
 	static void LoadSyncByPath(const FSoftObjectPath& AssetPath);
 	static void LoadSyncByName(const FName& AssetName);
 	static void LoadSyncByLabel(const FName& Label);
+
+	static void LoadAsyncByPath(const FSoftObjectPath& AssetPath, 
+		FAsyncLoadCompletedDelegate CompletedDelegate = FAsyncLoadCompletedDelegate());
+	static void LoadAsyncByName(const FName& AssetName,
+		FAsyncLoadCompletedDelegate CompletedDelegate = FAsyncLoadCompletedDelegate());
 
 	static void ReleaseByPath(const FSoftObjectPath& AssetPath);
 	static void ReleaseByName(const FName& AssetName);
