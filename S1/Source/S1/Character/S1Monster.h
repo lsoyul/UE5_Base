@@ -3,23 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "S1Character.generated.h"
+#include "Character/S1Character.h"
+#include "S1Monster.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class S1_API AS1Character : public ACharacter
+class S1_API AS1Monster : public AS1Character
 {
 	GENERATED_BODY()
-
+	
 public:
-	// Sets default values for this character's properties
-	AS1Character();
+	AS1Monster();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };

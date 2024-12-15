@@ -24,9 +24,10 @@ protected:
 	virtual void SetupInputComponent() override;
 
 private:
-	void Input_Test(const FInputActionValue& InputValue);
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
+	void Input_Jump(const FInputActionValue& InputValue);
+	void Input_Attack(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category=Input)

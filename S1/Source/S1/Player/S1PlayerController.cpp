@@ -8,6 +8,7 @@
 #include "System/S1AssetManager.h"
 #include "Data/S1InputData.h"
 #include "S1GameplayTags.h"
+#include "Character/S1Player.h"
 
 
 AS1PlayerController::AS1PlayerController(const FObjectInitializer& ObjectInitializer)
@@ -46,6 +47,12 @@ void AS1PlayerController::SetupInputComponent()
 
 		auto Action2 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Turn);
 		EnhancedInputComponent->BindAction(Action2, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
+
+		auto Action3 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Jump);
+		EnhancedInputComponent->BindAction(Action3, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump);
+
+		auto Action4 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Attack);
+		EnhancedInputComponent->BindAction(Action4, ETriggerEvent::Triggered, this, &ThisClass::Input_Attack);
 	}
 
 	//if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
@@ -54,11 +61,6 @@ void AS1PlayerController::SetupInputComponent()
 	//	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 	//	EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
 	//}
-}
-
-void AS1PlayerController::Input_Test(const FInputActionValue& InputValue)
-{
-	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Cyan, TEXT("Input_Test"));
 }
 
 void AS1PlayerController::Input_Move(const FInputActionValue& InputValue)
@@ -90,4 +92,18 @@ void AS1PlayerController::Input_Turn(const FInputActionValue& InputValue)
 {
 	float val = InputValue.Get<float>();
 	AddYawInput(val);	// ** Apply at PlayerController
+}
+
+void AS1PlayerController::Input_Jump(const FInputActionValue& InputValue)
+{
+	if (AS1Character* TargetCharacter = Cast<AS1Character>(GetPawn()))
+	{
+		TargetCharacter->Jump();
+	}
+	
+}
+
+void AS1PlayerController::Input_Attack(const FInputActionValue& InputValue)
+{
+	UE_LOG(LogS1, Log, TEXT("Input_Attack"));
 }
