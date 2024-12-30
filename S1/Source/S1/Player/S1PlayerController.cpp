@@ -96,6 +96,8 @@ void AS1PlayerController::Input_Turn(const FInputActionValue& InputValue)
 
 void AS1PlayerController::Input_Jump(const FInputActionValue& InputValue)
 {
+	//UE_LOG(LogS1, Log, TEXT("Input_Jump"));
+
 	if (AS1Character* TargetCharacter = Cast<AS1Character>(GetPawn()))
 	{
 		TargetCharacter->Jump();
@@ -105,5 +107,10 @@ void AS1PlayerController::Input_Jump(const FInputActionValue& InputValue)
 
 void AS1PlayerController::Input_Attack(const FInputActionValue& InputValue)
 {
-	UE_LOG(LogS1, Log, TEXT("Input_Attack"));
+	//UE_LOG(LogS1, Log, TEXT("Input_Attack"));
+
+	if (AttackMontage)
+	{
+		Cast<AS1Character>(GetPawn())->PlayAnimMontage(AttackMontage);
+	}
 }

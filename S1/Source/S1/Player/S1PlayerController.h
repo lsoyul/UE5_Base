@@ -30,15 +30,21 @@ private:
 	void Input_Attack(const FInputActionValue& InputValue);
 
 protected:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UAnimMontage> AttackMontage;
+
+protected:
+	/*
 	UPROPERTY(EditAnywhere, Category=Input)
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
-
+	
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> TestAction;
-
+	
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> MoveAction;
-
+	
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> TurnAction;
+	*/
 };
