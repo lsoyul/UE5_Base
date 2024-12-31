@@ -7,7 +7,7 @@
 #include "S1PlayerController.generated.h"
 
 struct FInputActionValue;
-
+class UNiagaraSystem;
 /**
  * 
  */
@@ -24,27 +24,21 @@ protected:
 	virtual void SetupInputComponent() override;
 
 private:
-	void Input_Move(const FInputActionValue& InputValue);
-	void Input_Turn(const FInputActionValue& InputValue);
-	void Input_Jump(const FInputActionValue& InputValue);
-	void Input_Attack(const FInputActionValue& InputValue);
+	/** Input handlers for SetDestination action **/
+	void OnInputStarted();
+	void OnSetDestinationTriggered();
+	void OnSetDestinationReleased();
 
-protected:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UAnimMontage> AttackMontage;
+public:
+	/** Time threshold to know if it was short press **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	float ShortPressThreshold = 0.3f;
 
-protected:
-	/*
-	UPROPERTY(EditAnywhere, Category=Input)
-	TObjectPtr<class UInputMappingContext> InputMappingContext;
-	
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> TestAction;
-	
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> MoveAction;
-	
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> TurnAction;
-	*/
+	/** Fx class that we will spawn when clicking **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<UNiagaraSystem> FXCursor;
+
+private:
+	FVector CachedDestination;
+	float FollowTime; // For how long it has been pressed
 };

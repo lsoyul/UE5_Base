@@ -9,11 +9,20 @@
 #include "Data/S1InputData.h"
 #include "S1GameplayTags.h"
 #include "Character/S1Player.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "AIController.h"
 
 
 AS1PlayerController::AS1PlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bShowMouseCursor = true;
+	DefaultMouseCursor = EMouseCursor::Default;
+	CachedDestination = FVector::ZeroVector;
+	FollowTime = 0.f;
 }
 
 void AS1PlayerController::BeginPlay()
@@ -27,11 +36,6 @@ void AS1PlayerController::BeginPlay()
 			Subsystem->AddMappingContext(InputData->InputMappingContext, 0);
 		}
 	}
-
-	//if (auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	//{
-	//	Subsystem->AddMappingContext(InputMappingContext, 0);	// InputMappingContext, priority
-	//}
 }
 
 void AS1PlayerController::SetupInputComponent()
@@ -42,75 +46,61 @@ void AS1PlayerController::SetupInputComponent()
 	{
 		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
-		auto Action1 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Move);
-		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+		auto Action1 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_SetDestination);
 
-		auto Action2 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Turn);
-		EnhancedInputComponent->BindAction(Action2, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
-
-		auto Action3 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Jump);
-		EnhancedInputComponent->BindAction(Action3, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump);
-
-		auto Action4 = InputData->FindInputActionByTag(S1GameplayTags::Input_Action_Attack);
-		EnhancedInputComponent->BindAction(Action4, ETriggerEvent::Triggered, this, &ThisClass::Input_Attack);
-	}
-
-	//if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
-	//{
-	//	EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Test);
-	//	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-	//	EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
-	//}
-}
-
-void AS1PlayerController::Input_Move(const FInputActionValue& InputValue)
-{
-	FVector2D MovementVector = InputValue.Get<FVector2D>();
-
-	if (MovementVector.X != 0)
-	{
-		//FVector Direction = FVector::ForwardVector * MovementVector.X;
-		//GetPawn()->AddActorWorldOffset(Direction * 50.f);
-
-		FRotator Rotator = GetControlRotation();
-		FVector Direction = UKismetMathLibrary::GetForwardVector(FRotator(0, Rotator.Yaw, 0));
-		GetPawn()->AddMovementInput(Direction, MovementVector.X);
-	}
-
-	if (MovementVector.Y != 0)
-	{
-		//FVector Direction = FVector::RightVector * MovementVector.Y;
-		//GetPawn()->AddActorWorldOffset(Direction * 50.f);
-		
-		FRotator Rotator = GetControlRotation();
-		FVector Direction = UKismetMathLibrary::GetRightVector(FRotator(0, Rotator.Yaw, 0));
-		GetPawn()->AddMovementInput(Direction, MovementVector.Y);
+		// Setup mouse input actions
+		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Started, this, &ThisClass::OnInputStarted);
+		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Triggered, this, &ThisClass::OnSetDestinationTriggered);
+		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Completed, this, &ThisClass::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Canceled, this, &ThisClass::OnSetDestinationReleased);
 	}
 }
 
-void AS1PlayerController::Input_Turn(const FInputActionValue& InputValue)
+void AS1PlayerController::OnInputStarted()
 {
-	float val = InputValue.Get<float>();
-	AddYawInput(val);	// ** Apply at PlayerController
+	StopMovement();
 }
 
-void AS1PlayerController::Input_Jump(const FInputActionValue& InputValue)
+// Triggered every frame when the input is held down
+void AS1PlayerController::OnSetDestinationTriggered()
 {
-	//UE_LOG(LogS1, Log, TEXT("Input_Jump"));
+	// Flag that the input is being pressed
+	FollowTime += GetWorld()->GetDeltaSeconds();
 
-	if (AS1Character* TargetCharacter = Cast<AS1Character>(GetPawn()))
+	// Look for the location in the world where the player has pressed the input
+	FHitResult Hit;
+	bool bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, OUT Hit);
+
+	// If hit a surface, cache the location
+	if (bHitSuccessful)
 	{
-		TargetCharacter->Jump();
+		CachedDestination = Hit.Location;
 	}
-	
+
+	if (FollowTime <= ShortPressThreshold)
+		return;
+
+	// Move towards mouse pointer or touch
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn != nullptr)
+	{
+		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		ControlledPawn->AddMovementInput(WorldDirection, 1.0f, false);
+	}
 }
 
-void AS1PlayerController::Input_Attack(const FInputActionValue& InputValue)
+void AS1PlayerController::OnSetDestinationReleased()
 {
-	//UE_LOG(LogS1, Log, TEXT("Input_Attack"));
-
-	if (AttackMontage)
+	// If it was short press
+	if (FollowTime <= ShortPressThreshold)
 	{
-		Cast<AS1Character>(GetPawn())->PlayAnimMontage(AttackMontage);
+		// Move to cached destination and spawn cursor particle
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);	// not working..
+		//AAIController* AIController = Cast<AAIController>(GetCharacter()->GetController());
+		//AIController->MoveToLocation(CachedDestination);
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 	}
+
+	FollowTime = 0.f;
 }
