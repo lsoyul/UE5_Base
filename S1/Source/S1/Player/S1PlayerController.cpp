@@ -95,10 +95,7 @@ void AS1PlayerController::OnSetDestinationReleased()
 	if (FollowTime <= ShortPressThreshold)
 	{
 		// Move to cached destination and spawn cursor particle
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);	// not working..
-		//AAIController* AIController = Cast<AAIController>(GetCharacter()->GetController());
-		//AIController->MoveToLocation(CachedDestination);
-
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);	// working on NavMeshVolumn..
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 	}
 
