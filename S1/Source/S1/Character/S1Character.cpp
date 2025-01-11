@@ -25,3 +25,13 @@ void AS1Character::Tick(float DeltaTime)
 
 }
 
+void AS1Character::Highlight()
+{
+	bHighlighted = true;
+}
+
+void AS1Character::UnHighlight()
+{
+	bHighlighted = false;
+}
+

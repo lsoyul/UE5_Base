@@ -56,6 +56,58 @@ void AS1PlayerController::SetupInputComponent()
 	}
 }
 
+void AS1PlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+
+	TickCursorTrace();
+}
+
+void AS1PlayerController::TickCursorTrace()
+{
+	if (bMousePressed)
+	{
+		return;
+	}
+
+	FHitResult OutCursorHit;
+	if (false == GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, OUT OutCursorHit))
+	{
+		return;
+	}
+
+	AS1Character* LocalHighlightActor = Cast<AS1Character>(OutCursorHit.GetActor());
+	if (LocalHighlightActor == nullptr)
+	{
+		// 이미 highlight 된 액터가 있었는데 없어짐.
+		if (HighlightActor)
+		{
+			HighlightActor->UnHighlight();
+		}
+	}
+	else
+	{
+		if (HighlightActor)
+		{
+			// 이미 highlight 된 액터가 있었는데 새로운 액터를 highlight 한 상황.
+			if (HighlightActor != LocalHighlightActor)
+			{
+				HighlightActor->UnHighlight();
+				LocalHighlightActor->Highlight();
+			}
+			
+			// 동일한 액터면 무시
+		}
+		else
+		{
+			// 원래 없었고 새로운 타겟.
+			LocalHighlightActor->Highlight();
+		}
+	}
+
+	HighlightActor = LocalHighlightActor;
+}
+
 void AS1PlayerController::OnInputStarted()
 {
 	StopMovement();
