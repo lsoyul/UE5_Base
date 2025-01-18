@@ -36,6 +36,8 @@ void AS1PlayerController::BeginPlay()
 			Subsystem->AddMappingContext(InputData->InputMappingContext, 0);
 		}
 	}
+
+	S1Player = Cast<AS1Player>(GetCharacter());
 }
 
 void AS1PlayerController::SetupInputComponent()
@@ -61,6 +63,13 @@ void AS1PlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	TickCursorTrace();
+
+	if (false == GetCharacter()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(nullptr))
+	{
+		SetCreatureState(ECreatureState::Moving);
+	}
+
+	ChaseTargetAndAttack();
 }
 
 void AS1PlayerController::TickCursorTrace()
@@ -108,14 +117,69 @@ void AS1PlayerController::TickCursorTrace()
 	HighlightActor = LocalHighlightActor;
 }
 
+void AS1PlayerController::ChaseTargetAndAttack()
+{
+	if (TargetActor == nullptr)
+	{
+		return;
+	}
+
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
+	FVector Direction = TargetActor->GetActorLocation() - S1Player->GetActorLocation();
+	
+	if (Direction.Length() < 250.0f) // Is in attack range?
+	{
+		GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Cyan, TEXT("Attack"));
+
+		if (AttackMontage)
+		{
+			if (bMousePressed)
+			{
+				FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(S1Player->GetActorLocation(), TargetActor->GetActorLocation());
+				S1Player->SetActorRotation(Rotator);
+
+				GetCharacter()->PlayAnimMontage(AttackMontage);
+				SetCreatureState(ECreatureState::Skill);
+
+				TargetActor = HighlightActor;
+			}
+			else
+			{
+				TargetActor = nullptr;
+			}
+		}
+	}
+	else
+	{
+		FVector WorldDirection = Direction.GetSafeNormal();
+		S1Player->AddMovementInput(WorldDirection, 1.0f, false);
+	}
+}
+
 void AS1PlayerController::OnInputStarted()
 {
 	StopMovement();
+	bMousePressed = true;
+	TargetActor = HighlightActor;
 }
 
 // Triggered every frame when the input is held down
 void AS1PlayerController::OnSetDestinationTriggered()
 {
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
+	if (TargetActor)
+	{
+		return;
+	}
+
 	// Flag that the input is being pressed
 	FollowTime += GetWorld()->GetDeltaSeconds();
 
@@ -133,23 +197,50 @@ void AS1PlayerController::OnSetDestinationTriggered()
 		return;
 
 	// Move towards mouse pointer or touch
-	APawn* ControlledPawn = GetPawn();
-	if (ControlledPawn != nullptr)
+	if (S1Player)
 	{
-		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-		ControlledPawn->AddMovementInput(WorldDirection, 1.0f, false);
+		FVector WorldDirection = (CachedDestination - S1Player->GetActorLocation()).GetSafeNormal();
+		S1Player->AddMovementInput(WorldDirection, 1.0f, false);
 	}
 }
 
 void AS1PlayerController::OnSetDestinationReleased()
 {
+	bMousePressed = false;
+
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
 	// If it was short press
 	if (FollowTime <= ShortPressThreshold)
 	{
-		// Move to cached destination and spawn cursor particle
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);	// working on NavMeshVolumn..
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		if (TargetActor == nullptr)
+		{
+			// Move to cached destination and spawn cursor particle
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);	// working on NavMeshVolumn..
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		}
 	}
 
 	FollowTime = 0.f;
+}
+
+ECreatureState AS1PlayerController::GetCreatureState()
+{
+	if (S1Player)
+	{
+		return S1Player->CreatureState;
+	}
+
+	return ECreatureState::None;
+}
+
+void AS1PlayerController::SetCreatureState(ECreatureState InState)
+{
+	if (S1Player)
+	{
+		S1Player->CreatureState = InState;
+	}
 }

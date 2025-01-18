@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "S1Define.h"
 #include "S1PlayerController.generated.h"
 
 struct FInputActionValue;
@@ -26,12 +27,16 @@ protected:
 
 private:
 	void TickCursorTrace();
+	void ChaseTargetAndAttack();
 
 private:
 	/** Input handlers for SetDestination action **/
 	void OnInputStarted();
 	void OnSetDestinationTriggered();
 	void OnSetDestinationReleased();
+
+	ECreatureState GetCreatureState();
+	void SetCreatureState(ECreatureState InState);
 
 public:
 	/** Time threshold to know if it was short press **/
@@ -50,6 +55,13 @@ private:
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class AS1Character> TargetActor;
+	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class AS1Character> HighlightActor;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UAnimMontage> AttackMontage;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<class AS1Player> S1Player;
 };
