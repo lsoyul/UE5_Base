@@ -17,7 +17,7 @@ void US1AnimInstance::NativeInitializeAnimation()
 	/* Referred from AnimInstance default blueprint*/
 	Super::NativeInitializeAnimation();
 
-	Character = Cast<AS1Player>(TryGetPawnOwner());
+	Character = Cast<AS1Character>(TryGetPawnOwner());
 	if (Character)
 		MovementComponent = Character->GetCharacterMovement();
 }
