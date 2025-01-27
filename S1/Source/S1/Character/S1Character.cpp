@@ -2,6 +2,7 @@
 
 
 #include "S1Character.h"
+#include "S1Define.h"
 
 // Sets default values
 AS1Character::AS1Character()
@@ -25,6 +26,10 @@ void AS1Character::Tick(float DeltaTime)
 
 }
 
+void AS1Character::HandleGameplayEvent(FGameplayTag EventTag)
+{
+}
+
 void AS1Character::Highlight()
 {
 	bHighlighted = true;
@@ -33,5 +38,24 @@ void AS1Character::Highlight()
 void AS1Character::UnHighlight()
 {
 	bHighlighted = false;
+}
+
+void AS1Character::OnDamaged(int32 Damage, TObjectPtr<AS1Character> Attacker)
+{
+	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
+	if (Hp == 0)
+	{
+		OnDead(Attacker);
+	}
+
+	D(FString::Printf(TEXT("%d"), Hp));
+}
+
+void AS1Character::OnDead(TObjectPtr<AS1Character> Attacker)
+{
+	if (CreatureState == ECreatureState::Dead)
+		return;
+
+	CreatureState = ECreatureState::Dead;
 }
 
