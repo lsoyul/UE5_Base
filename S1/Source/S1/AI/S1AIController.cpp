@@ -19,6 +19,7 @@ void AS1AIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*
 	FVector Dest = { 0, 0, 0 };
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalLocation(Dest);
@@ -36,8 +37,9 @@ void AS1AIController::BeginPlay()
 			DrawDebugSphere(GetWorld(), Location, 12.f, 12, FColor::Green, false, 10.f);
 		}
 	}
+	*/
 }
-
+ 
 void AS1AIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
