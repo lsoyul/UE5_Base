@@ -33,11 +33,14 @@ void AS1Character::HandleGameplayEvent(FGameplayTag EventTag)
 void AS1Character::Highlight()
 {
 	bHighlighted = true;
+	GetMesh()->SetRenderCustomDepth(true);
+	GetMesh()->SetCustomDepthStencilValue(250);
 }
 
 void AS1Character::UnHighlight()
 {
 	bHighlighted = false;
+	GetMesh()->SetRenderCustomDepth(false);
 }
 
 void AS1Character::OnDamaged(int32 Damage, TObjectPtr<AS1Character> Attacker)
