@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Player/S1PlayerController.h"
 
 AS1Player::AS1Player()
 {
@@ -46,6 +47,15 @@ void AS1Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AS1Player::HandleGameplayEvent(FGameplayTag EventTag)
+{
+	AS1PlayerController* PC = Cast<AS1PlayerController>(GetController());
+	if (PC)
+	{
+		PC->HandleGameplayEvent(EventTag);
+	}
 }
 
 // Called to bind functionality to input

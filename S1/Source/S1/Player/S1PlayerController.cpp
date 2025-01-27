@@ -72,6 +72,17 @@ void AS1PlayerController::PlayerTick(float DeltaTime)
 	ChaseTargetAndAttack();
 }
 
+void AS1PlayerController::HandleGameplayEvent(FGameplayTag EventTag)
+{
+	if (EventTag.MatchesTag(S1GameplayTags::Event_Montage_Attack))
+	{
+		if (TargetActor)
+		{
+			TargetActor->OnDamaged(S1Player->FinalDamage, S1Player);
+		}
+	}
+}
+
 void AS1PlayerController::TickCursorTrace()
 {
 	if (bMousePressed)
@@ -133,12 +144,15 @@ void AS1PlayerController::ChaseTargetAndAttack()
 	
 	if (Direction.Length() < 250.0f) // Is in attack range?
 	{
-		GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Cyan, TEXT("Attack"));
+		//GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Cyan, TEXT("Attack"));
+		//D(TEXT("Attack"));
 
 		if (AttackMontage)
 		{
 			if (bMousePressed)
 			{
+				//TargetActor->OnDamaged(S1Player->FinalDamage, S1Player);
+
 				FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(S1Player->GetActorLocation(), TargetActor->GetActorLocation());
 				S1Player->SetActorRotation(Rotator);
 
