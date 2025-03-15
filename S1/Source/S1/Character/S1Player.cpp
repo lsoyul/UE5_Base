@@ -7,6 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Player/S1PlayerController.h"
+#include "Player/S1PlayerState.h"
+#include "AbilitySystem/S1AbilitySystemComponent.h"
+#include "AbilitySystem/Attributes/S1AttributeSetPlayer.h"
 
 AS1Player::AS1Player()
 {
@@ -39,7 +42,40 @@ AS1Player::AS1Player()
 void AS1Player::BeginPlay()
 {
 	Super::BeginPlay();
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnBeginOverlap);
+	//GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnBeginOverlap);
+
+	// TEMP
+	if (TestEffect && AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+
+		// Handle
+		FGameplayEffectSpecHandle EffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(TestEffect, 1, EffectContext);
+
+		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+	}
+}
+
+void AS1Player::PossessedBy(AController* NewController)
+{
+	// 'PossessedBy' called earlier than 'BeginPlay()'
+	Super::PossessedBy(NewController);
+
+	InitAbilitySystem();
+}
+
+void AS1Player::InitAbilitySystem()
+{
+	Super::InitAbilitySystem();
+
+	if (AS1PlayerState* PS = GetPlayerState<AS1PlayerState>())
+	{
+		AbilitySystemComponent = Cast<US1AbilitySystemComponent>(PS->GetAbilitySystemComponent());
+		AbilitySystemComponent->InitAbilityActorInfo(PS, this);
+
+		AttributeSet = PS->GetS1AttributeSetPlayer();
+	}
 }
 
 // Called every frame

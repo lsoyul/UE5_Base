@@ -20,6 +20,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void InitAbilitySystem() override;
+
 
 public:
 	// Called every frame
@@ -40,4 +43,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UCameraComponent> Camera;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UGameplayEffect> TestEffect;
 };

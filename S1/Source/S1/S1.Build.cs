@@ -21,9 +21,12 @@ public class S1 : ModuleRules
 			"InputCore", 
 			"EnhancedInput", 
 			"GameplayTags",
+			"GameplayTasks",
+			"GameplayAbilities",
 			"NavigationSystem",
 			"AIModule",
-			"Niagara"
+			"Niagara",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
