@@ -144,27 +144,20 @@ void AS1PlayerController::ChaseTargetAndAttack()
 	
 	if (Direction.Length() < 250.0f) // Is in attack range?
 	{
-		//GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Cyan, TEXT("Attack"));
-		//D(TEXT("Attack"));
-
-		if (AttackMontage)
+		if (bMousePressed)
 		{
-			if (bMousePressed)
-			{
-				//TargetActor->OnDamaged(S1Player->FinalDamage, S1Player);
+			FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(S1Player->GetActorLocation(), TargetActor->GetActorLocation());
+			S1Player->SetActorRotation(Rotator);
 
-				FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(S1Player->GetActorLocation(), TargetActor->GetActorLocation());
-				S1Player->SetActorRotation(Rotator);
+			S1Player->ActivateAbility(S1GameplayTags::Ability_Attack);
 
-				GetCharacter()->PlayAnimMontage(AttackMontage);
-				SetCreatureState(ECreatureState::Skill);
+			SetCreatureState(ECreatureState::Skill);
 
-				TargetActor = HighlightActor;
-			}
-			else
-			{
-				TargetActor = nullptr;
-			}
+			TargetActor = HighlightActor;
+		}
+		else
+		{
+			TargetActor = nullptr;
 		}
 	}
 	else

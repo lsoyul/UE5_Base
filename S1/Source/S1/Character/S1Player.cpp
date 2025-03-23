@@ -105,3 +105,8 @@ void AS1Player::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	UE_LOG(LogTemp, Log, TEXT("OnBeginOverlap"));
 }
+
+void AS1Player::ActivateAbility(FGameplayTag AbilityTag)
+{
+	AbilitySystemComponent->ActivateAbility(AbilityTag); 
+}
